@@ -1,15 +1,15 @@
 import { connectDB, Message, User } from "./_db.js";
 import Pusher from "pusher";
 
-export default async function handler(req, res) {
-  const pusher = new Pusher({
-    appId: process.env.PUSHER_APP_ID,
-    key: process.env.PUSHER_KEY,
-    secret: process.env.PUSHER_SECRET,
-    cluster: process.env.PUSHER_CLUSTER,
-    useTLS: true,
-  });
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.PUSHER_CLUSTER,
+  useTLS: true,
+});
 
+export default async function handler(req, res) {
   if (req.method !== "POST")
     return res.status(405).json({ error: "Method not allowed" });
 
@@ -19,24 +19,31 @@ export default async function handler(req, res) {
   if (!sender) return res.status(400).json({ error: "sender required" });
   if (!contact) return res.status(400).json({ error: "contact required" });
 
-  await connectDB();
+  try {
+    await connectDB();
 
-  const user = await User.findOne({ name: sender.name }).lean();
+    const user = await User.findOne({ name: sender.name }).lean();
 
-  if (user) {
-    const msg = await Message.create({ chat: contact, user: user._id, message });
+    if (user) {
+      const msg = await Message.create({
+        chat: contact,
+        user: user,
+        message,
+      });
 
-    const msgData = {
-      id: msg._id,
-      text: msg.message,
-      sender: sender.name,
-      timestamp: new Date(msg.createdAt),
-    };
+      const msgData = {
+        id: msg._id,
+        text: msg.message,
+        sender: "sender",
+        timestamp: new Date(msg.createdAt - 300000),
+        chat: msg.chat,
+      };
 
-    await pusher.trigger("chat-channel", "new-message", msgData);
+      await pusher.trigger("chat-channel", "new-message", msgData);
 
-    res.status(201).json(msg);
-  } else {
-    res.status(404).json({ error: "User not found" });
+      res.status(201).json(msgData);
+    }
+  } catch (error) {
+    console.log(error);
   }
 }

@@ -1,5 +1,6 @@
 import Pusher from "pusher-js";
 
-export const pusherClient = new Pusher(import.meta.env.PUSHER_KEY, {
-  cluster: import.meta.env.PUSHER_CLUSTER,
+export const pusherClient = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
+  cluster: import.meta.env.VITE_PUSHER_CLUSTER,
+  forceTLS: true,
 });

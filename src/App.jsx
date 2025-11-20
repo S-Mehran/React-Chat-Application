@@ -19,19 +19,21 @@ export default function App() {
   const [inputMessage, setInputMessage] = useState("");
 
   useEffect(() => {
-    const channel = pusherClient.subscribe("adored-sage-858");
+    const channel = pusherClient.subscribe("chat-channel");
 
     const handler = (data) => {
       console.log("New message event:", data);
 
-      if (data.chat === activeContact._id) {
+      if (activeContact && data.chat === activeContact._id) {
         setMessages((prev) => [...prev, data]);
       } else {
         const foundChat = contacts.find((contact) => contact._id === data.chat);
         if (foundChat) {
           foundChat.lastMessage = data.text;
           foundChat.timestamp = data.timestamp;
-          foundChat.unread++;
+          foundChat.unread = (foundChat.unread || 0) + 1;
+          // trigger a state update to re-render list
+          setContacts((prev) => prev.map((c) => (c._id === foundChat._id ? foundChat : c)));
         }
       }
     };
@@ -40,9 +42,9 @@ export default function App() {
 
     return () => {
       channel.unbind("new-message", handler);
-      pusherClient.unsubscribe("adored-sage-858");
+      pusherClient.unsubscribe("chat-channel");
     };
-  }, []);
+  }, [activeContact, contacts]);
 
   useEffect(() => {
     contactsApi.fetchData({ url: "api/chats", method: "GET" });
@@ -69,7 +71,7 @@ export default function App() {
         data: { chat: activeContact, sender },
       });
     }
-  }, [activeContact, sender]);
+  }, [messagesApi, activeContact, sender]);
 
   useEffect(() => {
     setSender(findSender(contacts));
@@ -162,7 +164,7 @@ export default function App() {
                   className="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3 position-relative"
                   style={{ width: "40px", height: "40px" }}
                 >
-                  <span>{activeContact?.name.charAt(0)}</span>
+                  <span>{activeContact?.name ? activeContact.name.charAt(0) : ""}</span>
                   {activeContact?.online && (
                     <span
                       className="position-absolute bg-success rounded-circle border border-2 border-white"

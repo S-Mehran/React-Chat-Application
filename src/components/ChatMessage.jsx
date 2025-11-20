@@ -1,9 +1,11 @@
 import { Card } from "react-bootstrap";
 
 export function ChatMessage({ text, sender, timestamp }) {
-  const isUser = sender === "user";
+  const isUser = sender === "sender";
 
   const formatTime = (date) => {
+    if (!(date instanceof Date)) date = new Date(date);
+    if (isNaN(date.getTime())) return "--";
     return date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
