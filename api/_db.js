@@ -5,10 +5,12 @@ let conn = null;
 
 export async function connectDB() {
   if (conn) return conn;
-  conn = await mongoose.connect(
-    //"mongodb+srv://nomi1408:nomi03114206575@cluster0.cz0alea.mongodb.net/"
-    "mongodb+srv://smehranmme_db_user:RnCWE7pfYd6Am7RG@cluster0.ry3l0d1.mongodb.net/?appName=Cluster0"
-  );
+  // conn = await mongoose.connect(
+  //   //"mongodb+srv://nomi1408:nomi03114206575@cluster0.cz0alea.mongodb.net/"
+  //   "mongodb+srv://smehranmme_db_user:RnCWE7pfYd6Am7RG@cluster0.ry3l0d1.mongodb.net/?appName=Cluster0"
+  // );
+  conn = await mongoose.connect(process.env.MONGO_URI);
+
   console.log("✅ MongoDB connected");
   return conn;
 }

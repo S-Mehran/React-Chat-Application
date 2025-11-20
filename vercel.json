@@ -3,13 +3,6 @@
   "devCommand": "vite",
   "installCommand": "npm install",
   "framework": "vite",
-  "env": [
-    "DB_CONN",
-    "PUSHER_APP_ID",
-    "PUSHER_KEY",
-    "PUSHER_SECRET",
-    "PUSHER_CLUSTER"
-  ],
   "functions": {
     "api/**/*.js": {
       "runtime": "nodejs20.x",
